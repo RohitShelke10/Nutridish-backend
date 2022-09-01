@@ -4,8 +4,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const book = async (req: Request, res: Response) => {
-  const { name, contact, building, department, floor, room } = req.body;
-  if (name && contact && building && department && floor && room) {
+  const { name, contact, building, department, floor, room, date } = req.body;
+  if (name && contact && building && department && floor && room && date) {
     const doc = new GoogleSpreadsheet(process.env.sheetID);
     try {
       await doc.useServiceAccountAuth({
@@ -14,13 +14,6 @@ export const book = async (req: Request, res: Response) => {
       });
       await doc.loadInfo();
       const sheet = doc.sheetsByTitle[process.env.sheetTitle!];
-      let date = new Date();
-      const time = new Date().toLocaleTimeString();
-      if (parseInt(time.split(":")[0]) > 10) {
-        date.setDate(date.getDate() + 1);
-      } else {
-        date.setDate(date.getDate());
-      }
       const row = await sheet.addRow({
         name: name,
         contact: contact,
@@ -28,7 +21,7 @@ export const book = async (req: Request, res: Response) => {
         department: department,
         floor: floor,
         room: room,
-        date: date.toLocaleDateString(),
+        date: date,
       });
       res.status(200).json({ message: "Success" });
     } catch (err) {
