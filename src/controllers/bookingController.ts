@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { GoogleSpreadsheet } from "google-spreadsheet";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 dotenv.config();
 
 export const book = async (req: Request, res: Response) => {
-  const { name, contact, address } = req.body;
-  if (name && contact && address) {
-    const doc = new GoogleSpreadsheet(
-      process.env.sheetID
-    );
+  const { name, contact, building, department, floor, room } = req.body;
+  if (name && contact && building && department && floor && room) {
+    const doc = new GoogleSpreadsheet(process.env.sheetID);
     try {
       await doc.useServiceAccountAuth({
         client_email: process.env.clientEmail!,
@@ -16,10 +14,21 @@ export const book = async (req: Request, res: Response) => {
       });
       await doc.loadInfo();
       const sheet = doc.sheetsByTitle[process.env.sheetTitle!];
+      let date = new Date();
+      const time = new Date().toLocaleTimeString();
+      if (parseInt(time.split(":")[0]) > 10) {
+        date.setDate(date.getDate() + 1);
+      } else {
+        date.setDate(date.getDate());
+      }
       const row = await sheet.addRow({
         name: name,
-        address: address,
         contact: contact,
+        building: building,
+        department: department,
+        floor: floor,
+        room: room,
+        date: date.toLocaleDateString(),
       });
       res.status(200).json({ message: "Success" });
     } catch (err) {
