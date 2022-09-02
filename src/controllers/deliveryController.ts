@@ -16,7 +16,10 @@ export const getBuildings = async (req: Request, res: Response) => {
 export const getDepartments = async (req: Request, res: Response) => {
   const building = req.params.building;
   try {
-    const departments = await Department.find({ building: building });
+    const departments = await Department.find(
+      { building: building },
+      { department: 1 }
+    );
     res.status(200).json(departments);
   } catch (err) {
     res.status(400).json(err);
