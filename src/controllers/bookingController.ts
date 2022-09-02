@@ -10,7 +10,7 @@ export const book = async (req: Request, res: Response) => {
     try {
       await doc.useServiceAccountAuth({
         client_email: process.env.clientEmail!,
-        private_key: process.env.privateKey!,
+        private_key: process.env.privateKey!.replace(/\\n/g, "\n"),
       });
       await doc.loadInfo();
       const sheet = doc.sheetsByTitle[process.env.sheetTitle!];
