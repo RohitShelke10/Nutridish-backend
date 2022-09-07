@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 const departmentScehma = new Schema({
-  building: { type: Schema.Types.ObjectId, ref: "building" },
+  floor: { type: Schema.Types.ObjectId, ref: "floor" },
   department: String,
 });
 
