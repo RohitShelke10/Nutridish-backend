@@ -3,10 +3,13 @@ const router = express.Router();
 import {
   getBuildings,
   getDepartments,
+  getFloors,
 } from "../controllers/deliveryController";
 
 router.get("/buildings", getBuildings);
 
-router.get("/departments/:building", getDepartments);
+router.get("/floors/:building", getFloors);
+
+router.get("/departments/:floor", getDepartments);
 
 export default router;
