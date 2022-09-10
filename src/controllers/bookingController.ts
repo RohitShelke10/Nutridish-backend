@@ -2,16 +2,46 @@ import { Request, Response } from "express";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dotenv from "dotenv";
 import fs from "fs";
+import Booking from "../models/bookings";
 dotenv.config();
 
 const file = fs.readFileSync("./info.json");
 
 export const book = async (req: Request, res: Response) => {
-  const { name, contact, building, department, floor, room, date } = req.body;
-  if (name && contact && building && department && floor && room && date) {
+  const {
+    name,
+    contact,
+    building,
+    department,
+    floor,
+    room,
+    date,
+    paymentMode,
+  } = req.body;
+  if (
+    name &&
+    contact &&
+    building &&
+    department &&
+    floor &&
+    room &&
+    date &&
+    paymentMode
+  ) {
     const doc = new GoogleSpreadsheet(process.env.sheetID);
+    const file = fs.readFileSync("./info.json");
+
     try {
-      const file = fs.readFileSync("./info.json");
+      await Booking.create({
+        name: name,
+        contact: contact,
+        building: building,
+        department: department,
+        floor: floor,
+        room: room,
+        date: date,
+        paymentMode: paymentMode,
+      });
       await doc.useServiceAccountAuth({
         client_email: process.env.clientEmail!,
         private_key: JSON.parse(file.toString()).private_key,
@@ -26,6 +56,7 @@ export const book = async (req: Request, res: Response) => {
         floor: floor,
         room: room,
         date: date,
+        paymentMode: paymentMode,
       });
       res.status(200).json({ message: "Success" });
     } catch (err) {
