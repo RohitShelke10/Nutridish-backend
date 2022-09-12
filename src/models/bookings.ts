@@ -6,8 +6,8 @@ const bookingSchema = new Schema<IBooking>({
   contact: { type: String, required: true, maxlength: 10, minlength: 10 },
   building: { type: String, required: true },
   department: { type: String, required: true },
-  floor: { type: Number, required: true },
-  room: { type: Number, required: true },
+  floor: { type: String, required: true },
+  room: { type: String, required: true },
   date: { type: String, required: true },
   paymentMode: { type: String },
 });
