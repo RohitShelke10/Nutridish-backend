@@ -3,8 +3,8 @@ export interface IBooking {
   contact: string;
   building: string;
   department: string;
-  floor: number;
-  room: number;
+  floor: string;
+  room: string;
   date: string;
   paymentMode: string;
 }
