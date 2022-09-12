@@ -9,7 +9,7 @@ const bookingSchema = new Schema<IBooking>({
   floor: { type: Number, required: true },
   room: { type: Number, required: true },
   date: { type: String, required: true },
-  paymentMode: { type: String, enum: ["pay on delivery", "upi"] },
+  paymentMode: { type: String },
 });
 
 export default model("booking", bookingSchema);
