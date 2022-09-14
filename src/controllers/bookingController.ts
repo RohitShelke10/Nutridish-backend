@@ -18,7 +18,16 @@ export const book = async (req: Request, res: Response) => {
     date,
     paymentMode,
   } = req.body;
-  if (name && contact && building && department && floor && room && date) {
+  if (
+    name &&
+    contact &&
+    building &&
+    department &&
+    floor &&
+    room &&
+    date &&
+    paymentMode
+  ) {
     const doc = new GoogleSpreadsheet(process.env.sheetID);
     const file = fs.readFileSync("./info.json");
 
@@ -31,7 +40,7 @@ export const book = async (req: Request, res: Response) => {
         floor: floor,
         room: room,
         date: date,
-        paymentMode: paymentMode ? paymentMode : "",
+        paymentMode: paymentMode,
       });
       await doc.useServiceAccountAuth({
         client_email: process.env.clientEmail!,
@@ -47,7 +56,7 @@ export const book = async (req: Request, res: Response) => {
         floor: floor,
         room: room,
         date: date,
-        paymentMode: paymentMode ? paymentMode : "",
+        paymentMode: paymentMode,
       });
       res.status(200).json({ message: "Success" });
     } catch (err) {
