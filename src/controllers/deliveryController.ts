@@ -17,7 +17,9 @@ export const getBuildings = async (req: Request, res: Response) => {
 export const getFloors = async (req: Request, res: Response) => {
   const building = req.params.building;
   try {
-    const floors = await Floor.find({ building: building }, { floor: 1 });
+    const floors = await Floor.find({ building: building }, { floor: 1 }).sort({
+      floor: 1,
+    });
     res.status(200).json(floors);
   } catch (err) {
     res.status(400).json(err);
