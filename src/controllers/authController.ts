@@ -12,83 +12,63 @@ const createToken = (id: Schema.Types.ObjectId) => {
 
 export const sendVerificationEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
-  var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-  const otp = otpGenerator.generate(6, {
-    digits: true,
-    lowerCaseAlphabets: false,
-    upperCaseAlphabets: false,
-    specialChars: false,
-  });
-  sendSmtpEmail = {
-    sender: { email: "startup.mcoe@gmail.com" },
-    to: [
-      {
-        email: email,
-      },
-    ],
-    subject: "Email Verification",
-    textContent: `Your OTP for email verification is ${otp}`,
-  };
-  await api.sendTransacEmail(sendSmtpEmail);
-  res.status(200).json(otp);
   try {
+    var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    const otp = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+    sendSmtpEmail = {
+      sender: { email: "startup.mcoe@gmail.com" },
+      to: [
+        {
+          email: email,
+        },
+      ],
+      subject: "Email Verification",
+      textContent: `Your OTP for email verification is ${otp}`,
+    };
+    await api.sendTransacEmail(sendSmtpEmail);
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      await User.create({ email: email, otp: otp });
+    } else {
+      await User.findOneAndUpdate({ email: email }, { $set: { otp: otp } });
+    }
+    res.status(200).json({ data: otp });
   } catch (err) {
-    res.status(400).json({ err });
+    res.status(400).json(err);
   }
 };
 
-export const handleSignUp = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { name, email, buildingId, floorId, departmentId } = req.body;
+export const handleSignIn = async (req: Request, res: Response) => {
+  const { email, otp } = req.body;
 
-  try {
-    const newUser = await User.create({
-      name: name,
-      email: email,
-      building: buildingId,
-      floor: floorId,
-      department: departmentId,
-    });
-    const user = await User.findById(newUser._id).populate([
-      "building",
-      "floor",
-      "department",
-    ]);
-    const token = createToken(newUser._id);
-    res.status(201).json({
-      user: user,
-      token: token,
-    });
-  } catch (err) {
-    res.status(400).json({ err });
-  }
-};
-
-export const handleLogin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { email } = req.body;
   try {
     const user = await User.findOne({ email: email }).populate([
       "building",
       "floor",
       "department",
     ]);
-    if (user && user._id) {
-      const token = createToken(user._id);
-      res.status(200).json({
-        user: user,
-        token: token,
-      });
+    if (user) {
+      if (user.otp === parseInt(otp)) {
+        const updatedUser = await User.findByIdAndUpdate(user._id, {
+          $unset: { otp: "" },
+        }).select({ otp: 0 });
+        const token = createToken(user._id);
+        res.status(201).json({
+          user: updatedUser,
+          token: token,
+        });
+      } else {
+        res.status(400).json({ messgae: "Incorrect OTP entered" });
+      }
     } else {
-      res.status(400).json({ message: "User with this email does not exist" });
+      res.status(404).json({ message: "User with this email does not exist" });
     }
   } catch (err) {
-    res.status(400).json({ err });
+    res.status(400).json(err);
   }
 };

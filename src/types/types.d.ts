@@ -27,4 +27,6 @@ export interface IUser {
   building: Schema.Types.ObjectId;
   floor: Schema.Types.ObjectId;
   department: Schema.Types.ObjectId;
+  otp: number;
+  detailsEntered: boolean;
 }
