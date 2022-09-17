@@ -4,6 +4,7 @@ import cors from "cors";
 import { connect } from "mongoose";
 import bookingRoutes from "./routes/bookingRouter";
 import deliveryRoutes from "./routes/deliveryRouter";
+import authRoutes from "./routes/authRouter";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.send("Nutriplate");
 });
 
+app.use("/", authRoutes);
 app.use("/book", bookingRoutes);
 app.use("/delivery", deliveryRoutes);
 
