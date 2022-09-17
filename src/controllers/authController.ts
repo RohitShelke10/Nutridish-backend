@@ -59,14 +59,22 @@ export const handleSignIn = async (req: Request, res: Response) => {
         }).select({ otp: 0 });
         const token = createToken(user._id);
         res.status(201).json({
+          success: true,
           user: updatedUser,
           token: token,
         });
       } else {
-        res.status(400).json({ messgae: "Incorrect OTP entered" });
+        res
+          .status(400)
+          .json({ success: false, message: "Incorrect OTP entered" });
       }
     } else {
-      res.status(404).json({ message: "User with this email does not exist" });
+      res
+        .status(404)
+        .json({
+          success: false,
+          message: "User with this email does not exist",
+        });
     }
   } catch (err) {
     res.status(400).json(err);
