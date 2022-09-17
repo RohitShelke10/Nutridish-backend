@@ -3,18 +3,19 @@ import { IUser } from "../types/types";
 
 const userSchema = new Schema<IUser>(
   {
-    name: { type: String, required: true },
+    name: { type: String },
+    otp: Number,
+    detailsEntered: { type: Boolean, default: false },
     email: {
       type: String,
       required: true,
       unique: true,
     },
-    building: { type: Schema.Types.ObjectId, ref: "building", required: true },
-    floor: { type: Schema.Types.ObjectId, ref: "floor", required: true },
+    building: { type: Schema.Types.ObjectId, ref: "building" },
+    floor: { type: Schema.Types.ObjectId, ref: "floor" },
     department: {
       type: Schema.Types.ObjectId,
       ref: "department",
-      required: true,
     },
   },
   { timestamps: true }
