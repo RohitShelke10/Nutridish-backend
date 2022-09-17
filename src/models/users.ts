@@ -4,11 +4,9 @@ import { IUser } from "../types/types";
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
-    contact: {
+    email: {
       type: String,
       required: true,
-      minlength: 10,
-      maxlength: 10,
       unique: true,
     },
     building: { type: Schema.Types.ObjectId, ref: "buildings", required: true },
