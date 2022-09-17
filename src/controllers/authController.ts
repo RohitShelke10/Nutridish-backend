@@ -45,14 +45,19 @@ export const handleSignUp = async (
   const { name, email, buildingId, floorId, departmentId } = req.body;
 
   try {
-    const user = await User.create({
+    const newUser = await User.create({
       name: name,
       email: email,
       building: buildingId,
       floor: floorId,
       department: departmentId,
     });
-    const token = createToken(user._id);
+    const user = await User.findById(newUser._id).populate([
+      "building",
+      "floor",
+      "department",
+    ]);
+    const token = createToken(newUser._id);
     res.status(201).json({
       user: user,
       token: token,
@@ -69,10 +74,13 @@ export const handleLogin = async (
 ) => {
   const { email } = req.body;
   try {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email }).populate([
+      "building",
+      "floor",
+      "department",
+    ]);
     if (user && user._id) {
       const token = createToken(user._id);
-      res.cookie("jwt", token, { httpOnly: true });
       res.status(200).json({
         user: user,
         token: token,

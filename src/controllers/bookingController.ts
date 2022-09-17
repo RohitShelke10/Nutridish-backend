@@ -8,9 +8,18 @@ import User from "../models/users";
 dotenv.config();
 
 export const book = async (req: IRequest, res: Response) => {
-  const { building, department, floor, room, date, paymentMode } = req.body;
+  const { building, department, floor, room, date, paymentMode, quantity } =
+    req.body;
   const userId = req.user?._id;
-  if (building && department && floor && room && date) {
+  if (
+    building &&
+    department &&
+    floor &&
+    room &&
+    date &&
+    paymentMode &&
+    quantity
+  ) {
     const doc = new GoogleSpreadsheet(process.env.sheetID);
     const file = fs.readFileSync("./info.json");
 
@@ -24,7 +33,8 @@ export const book = async (req: IRequest, res: Response) => {
           floor: floor,
           room: room,
           date: date,
-          paymentMode: paymentMode ? paymentMode : "",
+          paymentMode: paymentMode,
+          quantity: quantity,
         });
         await doc.useServiceAccountAuth({
           client_email: process.env.clientEmail!,
@@ -39,7 +49,8 @@ export const book = async (req: IRequest, res: Response) => {
           floor: floor,
           room: room,
           date: date,
-          paymentMode: paymentMode ? paymentMode : "",
+          paymentMode: paymentMode,
+          quantity: quantity,
         });
         res.status(200).json({ message: "Success" });
       }
