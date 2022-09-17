@@ -17,6 +17,7 @@ export interface IBooking {
   room: string;
   date: string;
   paymentMode: string;
+  quantity: number;
 }
 
 export interface IUser {
