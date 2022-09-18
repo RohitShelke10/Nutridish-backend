@@ -11,6 +11,13 @@ const userSchema = new Schema<IUser>(
       required: true,
       unique: true,
     },
+    contact: {
+      type: String,
+      required: true,
+      unique: true,
+      minlength: 10,
+      maxlength: 10,
+    },
     building: { type: Schema.Types.ObjectId, ref: "building" },
     floor: { type: Schema.Types.ObjectId, ref: "floor" },
     department: {

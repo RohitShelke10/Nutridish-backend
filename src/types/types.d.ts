@@ -23,6 +23,7 @@ export interface IBooking {
 export interface IUser {
   _id: Schema.Types.ObjectId;
   name: string;
+  contact: string;
   email: string;
   building: Schema.Types.ObjectId;
   floor: Schema.Types.ObjectId;
