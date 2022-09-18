@@ -5,6 +5,7 @@ import { connect } from "mongoose";
 import bookingRoutes from "./routes/bookingRouter";
 import deliveryRoutes from "./routes/deliveryRouter";
 import authRoutes from "./routes/authRouter";
+import userRoutes from "./routes/userRouter";
 
 dotenv.config();
 
@@ -24,12 +25,13 @@ app.use(express.json());
 //Including Routers
 
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
-  res.send("Nutriplate");
+  res.send("Welcome to Nutri-Dish!");
 });
 
 app.use("/", authRoutes);
 app.use("/book", bookingRoutes);
 app.use("/delivery", deliveryRoutes);
+app.use("/user", userRoutes);
 
 app.listen(port, async (): Promise<void> => {
   try {
