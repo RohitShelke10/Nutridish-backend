@@ -18,6 +18,7 @@ export interface IBooking {
   date: string;
   paymentMode: string;
   quantity: number;
+  paymentId: string;
 }
 
 export interface IUser {
@@ -28,6 +29,14 @@ export interface IUser {
   building: Schema.Types.ObjectId;
   floor: Schema.Types.ObjectId;
   department: Schema.Types.ObjectId;
+  room: string;
   otp: number;
   detailsEntered: boolean;
+}
+
+export interface IPayment {
+  user: Schema.Types.ObjectId;
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
 }
