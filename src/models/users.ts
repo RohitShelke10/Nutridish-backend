@@ -13,10 +13,10 @@ const userSchema = new Schema<IUser>(
     },
     contact: {
       type: String,
-      required: true,
-      unique: true,
       minlength: 13,
       maxlength: 13,
+      required: true,
+      unique: true,
     },
     building: { type: Schema.Types.ObjectId, ref: "building" },
     floor: { type: Schema.Types.ObjectId, ref: "floor" },
@@ -24,6 +24,7 @@ const userSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: "department",
     },
+    room: String,
   },
   { timestamps: true }
 );
