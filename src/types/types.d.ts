@@ -32,11 +32,13 @@ export interface IUser {
   room: string;
   otp: number;
   detailsEntered: boolean;
+  isStaff: boolean;
 }
 
 export interface IPayment {
   user: Schema.Types.ObjectId;
-  razorpay_payment_id: string;
-  razorpay_order_id: string;
-  razorpay_signature: string;
+  payment_id: string;
+  reference_id: string;
+  status: string;
+  amount_paid: number;
 }

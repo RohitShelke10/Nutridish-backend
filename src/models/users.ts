@@ -25,6 +25,7 @@ const userSchema = new Schema<IUser>(
       ref: "department",
     },
     room: String,
+    isStaff: Boolean,
   },
   { timestamps: true }
 );
