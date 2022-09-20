@@ -99,41 +99,41 @@ export const book = async (req: IRequest, res: Response) => {
             paymentMode: paymentMode,
             quantity: quantity,
           });
-          if (user!.contact) {
-            await axios.post(
-              process.env.WA_URL!.toString(),
-              {
-                messaging_product: "whatsapp",
-                to: user!.contact,
-                type: "template",
-                template: {
-                  name: "order_confirm",
-                  language: {
-                    code: "en_GB",
-                  },
-                  components: [
-                    {
-                      type: "header",
-                      parameters: [
-                        {
-                          type: "image",
-                          image: {
-                            link: "https://res.cloudinary.com/dpp7elupy/image/upload/v1662890116/nutridish/Photo_from_%E0%A4%B5%E0%A5%87%E0%A4%A6_pnbwqa.jpg",
-                          },
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${process.env.WA_TOKEN}`,
-                },
-              }
-            );
-          }
+          // if (user!.contact) {
+          //   await axios.post(
+          //     process.env.WA_URL!.toString(),
+          //     {
+          //       messaging_product: "whatsapp",
+          //       to: user!.contact,
+          //       type: "template",
+          //       template: {
+          //         name: "order_confirm",
+          //         language: {
+          //           code: "en_GB",
+          //         },
+          //         components: [
+          //           {
+          //             type: "header",
+          //             parameters: [
+          //               {
+          //                 type: "image",
+          //                 image: {
+          //                   link: "https://res.cloudinary.com/dpp7elupy/image/upload/v1662890116/nutridish/Photo_from_%E0%A4%B5%E0%A5%87%E0%A4%A6_pnbwqa.jpg",
+          //                 },
+          //               },
+          //             ],
+          //           },
+          //         ],
+          //       },
+          //     },
+          //     {
+          //       headers: {
+          //         "Content-Type": "application/json",
+          //         Authorization: `Bearer ${process.env.WA_TOKEN}`,
+          //       },
+          //     }
+          //   );
+          // }
           const receipt = await Payment.create({
             user: user!._id,
             payment_id: payment.payments[0].payment_id,
