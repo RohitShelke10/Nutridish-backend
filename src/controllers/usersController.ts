@@ -3,10 +3,19 @@ import { IRequest } from "../types/types";
 import User from "../models/users";
 
 export const editProfile = async (req: IRequest, res: Response) => {
-  const { name, contact, buildingId, floorId, departmentId, room } = req.body;
+  const { name, contact, buildingId, floorId, departmentId, room, isStaff } =
+    req.body;
   const id = req.user?._id;
 
-  if (name && contact && buildingId && floorId && departmentId && room) {
+  if (
+    name &&
+    contact &&
+    buildingId &&
+    floorId &&
+    departmentId &&
+    room &&
+    isStaff
+  ) {
     try {
       const user = await User.findByIdAndUpdate(id, {
         $set: {
@@ -17,6 +26,7 @@ export const editProfile = async (req: IRequest, res: Response) => {
           department: departmentId,
           room: room,
           detailsEntered: true,
+          isStaff: isStaff,
         },
       });
       const updatedUser = await User.findById(user?._id);
