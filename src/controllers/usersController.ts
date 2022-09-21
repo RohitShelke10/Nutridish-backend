@@ -16,7 +16,7 @@ export const editProfile = async (req: IRequest, res: Response) => {
     floorId &&
     departmentId &&
     room &&
-    isStaff
+    isStaff !== undefined
   ) {
     try {
       const user = await User.findByIdAndUpdate(id, {
