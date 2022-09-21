@@ -177,7 +177,12 @@ export const deliver = async (req: IRequest, res: Response) => {
           $set: { isDelivered: true },
           $unset: { qr: "" },
         });
-        await cloud.uploader.destroy(`qrcodes/${booking._id}-qr`);
+        await cloud.uploader.destroy(
+          `qrcodes/${booking._id}-qr`,
+          async (err, result) => {
+            if (err) res.status(400).json({ error: err });
+          }
+        );
         res.send(`Delivered to ${user?.name}`);
       } else {
         res.send(`Already delivered to ${user?.name}`);
