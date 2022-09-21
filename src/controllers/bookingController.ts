@@ -197,7 +197,7 @@ export const deliver = async (req: IRequest, res: Response) => {
         await Booking.findByIdAndUpdate(bookingId, {
           $set: {
             isDelivered: true,
-            deliveredOn: `${new Date().toLocaleDateString()}`,
+            deliveredOn: `${new Date().toLocaleString()}`,
           },
           $unset: { qr: "" },
         });
