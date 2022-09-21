@@ -6,6 +6,9 @@ import Payment from "../models/payments";
 import axios from "axios";
 import otpGenerator from "otp-generator";
 import { instance as razorpay } from "../utils/razorpayUtil";
+import QRCode from "qrcode";
+import { cloud } from "../utils/cloudinaryUtil";
+import User from "../models/users";
 dotenv.config();
 
 export const createOrder = async (req: IRequest, res: Response) => {
@@ -74,7 +77,7 @@ export const book = async (req: IRequest, res: Response) => {
           amount_paid: payment.amount_paid / 100,
         });
         if (payment.payments[0].status === "captured") {
-          await Booking.create({
+          const booking = await Booking.create({
             user: user!._id,
             building: building,
             department: department,
@@ -84,6 +87,14 @@ export const book = async (req: IRequest, res: Response) => {
             paymentMode: paymentMode,
             quantity: quantity,
             paymentId: payment.payments[0].payment_id,
+          });
+          const result = await cloud.uploader.upload(
+            await QRCode.toDataURL(
+              `${process.env.SERVER_URL}/book/deliver/${booking._id}`
+            )
+          );
+          await Booking.findByIdAndUpdate(booking._id, {
+            $set: { qr: result.secure_url },
           });
           // *Whatsapp messaging*
           // if (user!.contact) {
@@ -121,9 +132,12 @@ export const book = async (req: IRequest, res: Response) => {
           //     }
           //   );
           // }
-          res
-            .status(200)
-            .json({ sucess: true, message: "Success", data: receipt });
+          res.status(200).json({
+            sucess: true,
+            message: "Success",
+            data: receipt,
+            qr: result.secure_url,
+          });
         } else {
           res.status(400).json({
             success: false,
@@ -144,5 +158,23 @@ export const book = async (req: IRequest, res: Response) => {
     }
   } else {
     res.status(400).json({ message: "Invalid data" });
+  }
+};
+
+export const deliver = async (req: IRequest, res: Response) => {
+  const bookingId = req.params.bookingId;
+  try {
+    const booking = await Booking.findById(bookingId);
+    if (booking) {
+      await Booking.findByIdAndUpdate(bookingId, {
+        $set: { isDelivered: true },
+      });
+      const user = await User.findById(booking.user);
+      res.send(`Delivered to ${user?.name}`);
+    } else {
+      res.send("Invalid qr");
+    }
+  } catch (err) {
+    res.status(400).json(err);
   }
 };

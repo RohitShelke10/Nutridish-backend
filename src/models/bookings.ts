@@ -12,6 +12,7 @@ const bookingSchema = new Schema<IBooking>(
     paymentMode: { type: String, required: true },
     quantity: { type: Number, required: true },
     paymentId: { type: String, required: true },
+    isDelivered: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
