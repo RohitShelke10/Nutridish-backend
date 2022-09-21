@@ -11,9 +11,9 @@ export interface UserPayload extends JwtPayload {
 
 export interface IBooking {
   user: Schema.Types.ObjectId;
-  building: string;
-  department: string;
-  floor: string;
+  building: Schema.Types.ObjectId;
+  department: Schema.Types.ObjectId;
+  floor: Schema.Types.ObjectId;
   room: string;
   date: string;
   paymentMode: string;
