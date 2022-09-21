@@ -90,7 +90,8 @@ export const book = async (req: IRequest, res: Response) => {
           await doc.loadInfo();
           const sheet = doc.sheetsByTitle[process.env.sheetTitle!];
           await sheet.addRow({
-            user: user!.name,
+            name: user!.name,
+            contact: user!.contact,
             building: building,
             department: department,
             floor: floor,
@@ -154,14 +155,17 @@ export const book = async (req: IRequest, res: Response) => {
           });
           res.status(400).json({
             success: false,
+            failed: true,
             message: "Payment failed, please retry",
             data: receipt,
           });
         }
       } else {
-        res
-          .status(400)
-          .json({ success: false, message: "Payment not made yet" });
+        res.status(400).json({
+          success: false,
+          failed: false,
+          message: "Payment not made yet",
+        });
       }
     } catch (err) {
       res.status(400).json(err);
