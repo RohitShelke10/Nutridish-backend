@@ -12,7 +12,8 @@ import User from "../models/users";
 dotenv.config();
 
 export const createOrder = async (req: IRequest, res: Response) => {
-  const { amount } = req.body;
+  const { amount, date } = req.body;
+  const user = req.user;
 
   try {
     const result = await razorpay.paymentLink.create({
@@ -31,6 +32,18 @@ export const createOrder = async (req: IRequest, res: Response) => {
         contact: req.user!.contact,
       },
     });
+    await Booking.create({
+      user: user!._id,
+      date: date,
+      paymentMode: "UPI",
+      quantity: amount,
+      paymentId: result.id,
+      paid: false,
+      building: user?.building,
+      department: user?.department,
+      floor: user?.floor,
+      room: user?.room,
+    });
     res.status(200).json({
       success: true,
       data: {
@@ -44,141 +57,99 @@ export const createOrder = async (req: IRequest, res: Response) => {
   }
 };
 
-export const book = async (req: IRequest, res: Response) => {
-  const {
-    building,
-    department,
-    floor,
-    room,
-    date,
-    paymentMode,
-    quantity,
-    paymentId,
-  } = req.body;
+export const verifyTranscation = async (req: IRequest, res: Response) => {
+  const { paymentId } = req.body;
   const user = req.user;
-  if (date && paymentMode && quantity) {
-    try {
-      if (paymentMode === "UPI") {
-        const payment = await razorpay.paymentLink.fetch(paymentId);
-        if (payment.payments.length !== 0) {
-          const receipt = await Payment.create({
-            user: user!._id,
-            payment_id: payment.payments[0].payment_id,
-            reference_id: payment.reference_id,
-            status: payment.payments[0].status,
-            amount_paid: payment.amount_paid / 100,
-          });
-          if (payment.payments[0].status === "captured") {
-            const booking = await Booking.create({
-              user: user!._id,
-              building: building ? building : user!.building,
-              department: department ? department : user!.department,
-              floor: floor ? floor : user!.floor,
-              room: room ? room : user!.room,
-              date: date,
-              paymentMode: paymentMode,
-              quantity: quantity,
-              paymentId: payment.payments[0].payment_id,
-            });
-            const result = await cloud.uploader.upload(
-              await QRCode.toDataURL(
-                `${process.env.SERVER_URL}/book/deliver/${booking._id}`
-              ),
-              {
-                overwrite: true,
-                folder: "qrcodes",
-                public_id: `${booking._id}-qr.png`,
-              }
-            );
-            await Booking.findByIdAndUpdate(booking._id, {
-              $set: { qr: result.secure_url },
-            });
-            // *Whatsapp messaging*
-            // if (user!.contact) {
-            //   await axios.post(
-            //     process.env.WA_URL!.toString(),
-            //     {
-            //       messaging_product: "whatsapp",
-            //       to: user!.contact,
-            //       type: "template",
-            //       template: {
-            //         name: "order_confirm",
-            //         language: {
-            //           code: "en_GB",
-            //         },
-            //         components: [
-            //           {
-            //             type: "header",
-            //             parameters: [
-            //               {
-            //                 type: "image",
-            //                 image: {
-            //                   link: "https://res.cloudinary.com/dpp7elupy/image/upload/v1662890116/nutridish/Photo_from_%E0%A4%B5%E0%A5%87%E0%A4%A6_pnbwqa.jpg",
-            //                 },
-            //               },
-            //             ],
-            //           },
-            //         ],
-            //       },
-            //     },
-            //     {
-            //       headers: {
-            //         "Content-Type": "application/json",
-            //         Authorization: `Bearer ${process.env.WA_TOKEN}`,
-            //       },
-            //     }
-            //   );
-            // }
-            res.status(200).json({
-              sucess: true,
-              message: "Success",
-              data: { booking: booking, qr: result.secure_url },
-            });
-          } else {
-            res.status(400).json({
-              success: false,
-              failed: true,
-              message: "Payment failed, please retry",
-              data: receipt,
-            });
+
+  try {
+    const payment = await razorpay.paymentLink.fetch(paymentId);
+    if (payment.payments.length !== 0) {
+      await Payment.create({
+        user: user!._id,
+        payment_id: payment.payments[0].payment_id,
+        reference_id: payment.reference_id,
+        status: payment.payments[0].status,
+        amount_paid: payment.amount_paid / 100,
+      });
+      if (payment.payments[0].status === "captured") {
+        const booking = await Booking.findOneAndUpdate(
+          { user: user?._id, paymentId: paymentId },
+          {
+            $set: {
+              paid: true,
+            },
           }
-        } else {
-          res.status(400).json({
-            success: false,
-            failed: false,
-            message: "Payment not made yet",
-          });
-        }
-      } else if (paymentMode === "Pay On Delivery") {
-        const booking = await Booking.create({
-          user: user!._id,
-          building: building ? building : user!.building,
-          department: department ? department : user!.department,
-          floor: floor ? floor : user!.floor,
-          room: room ? room : user!.room,
-          date: date,
-          paymentMode: paymentMode,
-          quantity: quantity,
-        });
+        );
         const result = await cloud.uploader.upload(
           await QRCode.toDataURL(
-            `${process.env.SERVER_URL}/book/deliver/${booking._id}`
+            `${process.env.SERVER_URL}/book/deliver/${booking?._id}`
           ),
           {
             overwrite: true,
             folder: "qrcodes",
-            public_id: `${booking._id}-qr.png`,
+            public_id: `${booking?._id}-qr.png`,
           }
         );
-        await Booking.findByIdAndUpdate(booking._id, {
+        const updatedBooking = await Booking.findByIdAndUpdate(booking?._id, {
           $set: { qr: result.secure_url },
         });
         res.status(200).json({
           sucess: true,
           message: "Success",
-          data: { booking: booking, qr: result.secure_url },
+          data: updatedBooking,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          failed: true,
+          message: "Payment failed, please retry",
         });
       }
+    } else {
+      res.status(400).json({
+        success: false,
+        failed: false,
+        message: "Payment not made yet",
+      });
+    }
+  } catch (err) {
+    res.status(200).json(err);
+  }
+};
+
+export const book = async (req: IRequest, res: Response) => {
+  const { building, department, floor, room, date, quantity } = req.body;
+  const user = req.user;
+  if (date && quantity) {
+    try {
+      const booking = await Booking.create({
+        user: user!._id,
+        building: building ? building : user!.building,
+        department: department ? department : user!.department,
+        floor: floor ? floor : user!.floor,
+        room: room ? room : user!.room,
+        date: date,
+        paymentMode: "Pay On Delivery",
+        quantity: quantity,
+      });
+      const result = await cloud.uploader.upload(
+        await QRCode.toDataURL(
+          `${process.env.SERVER_URL}/book/deliver/${booking._id}`
+        ),
+        {
+          overwrite: true,
+          folder: "qrcodes",
+          public_id: `${booking._id}-qr.png`,
+        }
+      );
+      const updatedBooking = await Booking.findByIdAndUpdate(booking._id, {
+        $set: { qr: result.secure_url },
+      });
+      res.status(200).json({
+        sucess: true,
+        message: "Success",
+        data: updatedBooking,
+      });
     } catch (err) {
       res.status(400).json(err);
     }

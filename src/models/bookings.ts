@@ -3,15 +3,15 @@ import { IBooking } from "../types/types";
 
 const bookingSchema = new Schema<IBooking>(
   {
-    user: { type: Schema.Types.ObjectId, required: true, ref: "users" },
-    building: { type: Schema.Types.ObjectId, required: true, ref: "buildings" },
+    user: { type: Schema.Types.ObjectId, ref: "users" },
+    building: { type: Schema.Types.ObjectId, ref: "buildings" },
     department: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: "departments",
     },
-    floor: { type: Schema.Types.ObjectId, required: true, ref: "floors" },
-    room: { type: String, required: true },
+    floor: { type: Schema.Types.ObjectId, ref: "floors" },
+    room: { type: String },
     date: { type: String, required: true },
     paymentMode: {
       type: String,
@@ -23,6 +23,7 @@ const bookingSchema = new Schema<IBooking>(
     isDelivered: { type: Boolean, default: false },
     qr: String,
     deliveredOn: String,
+    paid: Boolean,
   },
   { timestamps: true }
 );
