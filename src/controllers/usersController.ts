@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { IRequest } from "../types/types";
 import User from "../models/users";
+import Booking from "../models/bookings";
 import { auth as authentication } from "../utils/spreadsheetsUtil";
 require("dotenv").config();
 
@@ -65,6 +66,17 @@ export const getMenu = async (req: IRequest, res: Response) => {
         menu: data.data.values[0][1].split(","),
       },
     });
+  } catch (err) {
+    res.status(400).json(err);
+  }
+};
+
+export const getOrders = async (req: IRequest, res: Response) => {
+  const user = req.user;
+
+  try {
+    const orders = await Booking.find({ user: user?._id });
+    res.status(200).json({ data: orders });
   } catch (err) {
     res.status(400).json(err);
   }
