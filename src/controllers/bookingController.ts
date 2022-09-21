@@ -91,7 +91,12 @@ export const book = async (req: IRequest, res: Response) => {
           const result = await cloud.uploader.upload(
             await QRCode.toDataURL(
               `${process.env.SERVER_URL}/book/deliver/${booking._id}`
-            )
+            ),
+            {
+              overwrite: true,
+              folder: "qrcodes",
+              public_id: `${booking._id}-qr.png`,
+            }
           );
           await Booking.findByIdAndUpdate(booking._id, {
             $set: { qr: result.secure_url },
@@ -166,11 +171,17 @@ export const deliver = async (req: IRequest, res: Response) => {
   try {
     const booking = await Booking.findById(bookingId);
     if (booking) {
-      await Booking.findByIdAndUpdate(bookingId, {
-        $set: { isDelivered: true },
-      });
       const user = await User.findById(booking.user);
-      res.send(`Delivered to ${user?.name}`);
+      if (booking.qr) {
+        await Booking.findByIdAndUpdate(bookingId, {
+          $set: { isDelivered: true },
+          $unset: { qr: "" },
+        });
+        await cloud.uploader.destroy(`qrcodes/${booking._id}-qr`);
+        res.send(`Delivered to ${user?.name}`);
+      } else {
+        res.send(`Already delivered to ${user?.name}`);
+      }
     } else {
       res.send("Invalid qr");
     }
