@@ -106,21 +106,21 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
           data: { booking: booking, qr: result.secure_url },
         });
       } else {
-        res.status(400).json({
+        res.status(200).json({
           success: false,
           failed: true,
           message: "Payment failed, please retry",
         });
       }
     } else {
-      res.status(400).json({
+      res.status(200).json({
         success: false,
         failed: false,
         message: "Payment not made yet",
       });
     }
   } catch (err) {
-    res.status(200).json(err);
+    res.status(400).json(err);
   }
 };
 
