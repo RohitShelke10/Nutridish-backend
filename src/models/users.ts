@@ -15,7 +15,6 @@ const userSchema = new Schema<IUser>(
       type: String,
       minlength: 13,
       maxlength: 13,
-      required: true,
       unique: true,
     },
     building: { type: Schema.Types.ObjectId, ref: "building" },
