@@ -40,6 +40,10 @@ export const editProfile = async (req: IRequest, res: Response) => {
   }
 };
 
+export const getProfile = async (req: IRequest, res: Response) => {
+  res.status(200).json(req.user);
+};
+
 export const getMenu = async (req: IRequest, res: Response) => {
   try {
     const credentials = await authentication();
