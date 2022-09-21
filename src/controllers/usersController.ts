@@ -10,15 +10,7 @@ export const editProfile = async (req: IRequest, res: Response) => {
     req.body;
   const id = req.user?._id;
 
-  if (
-    name &&
-    contact &&
-    buildingId &&
-    floorId &&
-    departmentId &&
-    room &&
-    isStaff !== undefined
-  ) {
+  if (name && contact && buildingId && floorId && departmentId && room) {
     try {
       const user = await User.findByIdAndUpdate(id, {
         $set: {
@@ -29,7 +21,7 @@ export const editProfile = async (req: IRequest, res: Response) => {
           department: departmentId,
           room: room,
           detailsEntered: true,
-          isStaff: isStaff,
+          // isStaff: isStaff,
         },
       });
       const updatedUser = await User.findById(user?._id);
