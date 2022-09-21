@@ -22,6 +22,7 @@ export interface IBooking {
   isDelivered: boolean;
   qr: string;
   deliveredOn: string;
+  paid: boolean;
 }
 
 export interface IUser {
