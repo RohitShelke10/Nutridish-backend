@@ -63,8 +63,7 @@ export const book = async (req: IRequest, res: Response) => {
     room &&
     date &&
     paymentMode &&
-    quantity &&
-    paymentId
+    quantity
   ) {
     try {
       if (paymentMode === "UPI") {
