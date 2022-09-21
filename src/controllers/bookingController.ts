@@ -17,7 +17,7 @@ export const createOrder = async (req: IRequest, res: Response) => {
   try {
     const result = await razorpay.paymentLink.create({
       upi_link: true,
-      amount: amount * 100,
+      amount: amount * 25 * 100,
       currency: "INR",
       description: "Nutri-Dish",
       reference_id: otpGenerator.generate(10, {
