@@ -101,7 +101,7 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
           $set: { qr: result.secure_url },
         });
         res.status(200).json({
-          sucess: true,
+          success: true,
           message: "Success",
           data: { booking: booking, qr: result.secure_url },
         });
@@ -153,7 +153,7 @@ export const book = async (req: IRequest, res: Response) => {
         $set: { qr: result.secure_url },
       });
       res.status(200).json({
-        sucess: true,
+        success: true,
         message: "Success",
         data: { booking: booking, qr: result.secure_url },
       });
