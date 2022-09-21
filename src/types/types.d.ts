@@ -20,6 +20,7 @@ export interface IBooking {
   quantity: number;
   paymentId: string;
   isDelivered: boolean;
+  qr: string;
 }
 
 export interface IUser {
