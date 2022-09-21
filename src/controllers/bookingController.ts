@@ -171,12 +171,12 @@ export const book = async (req: IRequest, res: Response) => {
           }
         );
         await Booking.findByIdAndUpdate(booking._id, {
-          $set: { booking: booking, qr: result.secure_url },
+          $set: { qr: result.secure_url },
         });
         res.status(200).json({
           sucess: true,
           message: "Success",
-          data: { qr: result.secure_url },
+          data: { booking: booking, qr: result.secure_url },
         });
       }
     } catch (err) {
