@@ -1,8 +1,6 @@
 import { Response } from "express";
 import { IRequest } from "../types/types";
-import { GoogleSpreadsheet } from "google-spreadsheet";
 import dotenv from "dotenv";
-import fs from "fs";
 import Booking from "../models/bookings";
 import Payment from "../models/payments";
 import axios from "axios";
@@ -65,12 +63,16 @@ export const book = async (req: IRequest, res: Response) => {
     quantity &&
     paymentId
   ) {
-    const doc = new GoogleSpreadsheet(process.env.sheetID);
-    const file = fs.readFileSync("./info.json");
-
     try {
       const payment = await razorpay.paymentLink.fetch(paymentId);
       if (payment.payments.length !== 0) {
+        const receipt = await Payment.create({
+          user: user!._id,
+          payment_id: payment.payments[0].payment_id,
+          reference_id: payment.reference_id,
+          status: payment.payments[0].status,
+          amount_paid: payment.amount_paid / 100,
+        });
         if (payment.payments[0].status === "captured") {
           await Booking.create({
             user: user!._id,
@@ -83,23 +85,7 @@ export const book = async (req: IRequest, res: Response) => {
             quantity: quantity,
             paymentId: payment.payments[0].payment_id,
           });
-          await doc.useServiceAccountAuth({
-            client_email: process.env.clientEmail!,
-            private_key: JSON.parse(file.toString()).private_key,
-          });
-          await doc.loadInfo();
-          const sheet = doc.sheetsByTitle[process.env.sheetTitle!];
-          await sheet.addRow({
-            name: user!.name,
-            contact: user!.contact,
-            building: building,
-            department: department,
-            floor: floor,
-            room: room,
-            date: date,
-            paymentMode: paymentMode,
-            quantity: quantity,
-          });
+          // *Whatsapp messaging*
           // if (user!.contact) {
           //   await axios.post(
           //     process.env.WA_URL!.toString(),
@@ -135,24 +121,10 @@ export const book = async (req: IRequest, res: Response) => {
           //     }
           //   );
           // }
-          const receipt = await Payment.create({
-            user: user!._id,
-            payment_id: payment.payments[0].payment_id,
-            reference_id: payment.reference_id,
-            status: payment.payments[0].status,
-            amount_paid: payment.amount_paid / 100,
-          });
           res
             .status(200)
             .json({ sucess: true, message: "Success", data: receipt });
         } else {
-          const receipt = await Payment.create({
-            user: user!._id,
-            payment_id: payment.payments[0].payment_id,
-            reference_id: payment.reference_id,
-            status: payment.payments[0].status,
-            amount_paid: payment.amount_paid / 100,
-          });
           res.status(400).json({
             success: false,
             failed: true,

@@ -42,3 +42,8 @@ export interface IPayment {
   status: string;
   amount_paid: number;
 }
+
+export interface ISpreadSheetCredentials {
+  auth: GoogleAuth<JSONClient>;
+  googleSheetsInstance: sheets_v4.Sheets;
+}
