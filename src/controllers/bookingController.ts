@@ -177,8 +177,8 @@ export const deliver = async (req: IRequest, res: Response) => {
         await Booking.findByIdAndUpdate(bookingId, {
           $set: {
             isDelivered: true,
-            deliveredOn: `${date.getDate()} ${date.getMonth()} ${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${
-              date.getSeconds
+            deliveredOn: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${
+              date.getSeconds()
             }`,
           },
           $unset: { qr: "" },
