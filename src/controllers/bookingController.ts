@@ -194,7 +194,9 @@ export const deliver = async (req: IRequest, res: Response) => {
     if (booking) {
       const user = await User.findById(booking.user);
       if (booking.qr) {
-        const date = new Date().toLocaleString();
+        const date = new Date().toLocaleString("en-US", {
+          timeZone: "Asia/Kolkata",
+        });
         await Booking.findByIdAndUpdate(bookingId, {
           $set: {
             isDelivered: true,
