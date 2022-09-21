@@ -178,7 +178,7 @@ export const deliver = async (req: IRequest, res: Response) => {
           $unset: { qr: "" },
         });
         await cloud.uploader.destroy(
-          `qrcodes/${booking._id}-qr`,
+          `qrcodes/${booking._id}-qr.png`,
           async (err, result) => {
             if (err) res.status(400).json({ error: err });
           }
