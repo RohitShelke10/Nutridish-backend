@@ -12,7 +12,7 @@ import User from "../models/users";
 dotenv.config();
 
 export const createOrder = async (req: IRequest, res: Response) => {
-  const { amount, date } = req.body;
+  const { amount, date, building, department, floor, room } = req.body;
   const user = req.user;
 
   try {
@@ -39,10 +39,10 @@ export const createOrder = async (req: IRequest, res: Response) => {
       quantity: amount,
       paymentId: result.id,
       paid: false,
-      building: user?.building,
-      department: user?.department,
-      floor: user?.floor,
-      room: user?.room,
+      building: building ? building : user?.building,
+      department: department ? department : user?.department,
+      floor: floor ? floor : user?.floor,
+      room: room ? room : user?.room,
     });
     res.status(200).json({
       success: true,
@@ -90,13 +90,13 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
             public_id: `${booking?._id}-qr.png`,
           }
         );
-        const updatedBooking = await Booking.findByIdAndUpdate(booking?._id, {
+        await Booking.findByIdAndUpdate(booking?._id, {
           $set: { qr: result.secure_url },
         });
         res.status(200).json({
           sucess: true,
           message: "Success",
-          data: updatedBooking,
+          data: { booking: booking, qr: result.secure_url },
         });
       } else {
         res.status(400).json({
@@ -142,13 +142,13 @@ export const book = async (req: IRequest, res: Response) => {
           public_id: `${booking._id}-qr.png`,
         }
       );
-      const updatedBooking = await Booking.findByIdAndUpdate(booking._id, {
+      await Booking.findByIdAndUpdate(booking._id, {
         $set: { qr: result.secure_url },
       });
       res.status(200).json({
         sucess: true,
         message: "Success",
-        data: updatedBooking,
+        data: { booking: booking, qr: result.secure_url },
       });
     } catch (err) {
       res.status(400).json(err);
