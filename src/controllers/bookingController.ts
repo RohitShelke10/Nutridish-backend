@@ -173,8 +173,14 @@ export const deliver = async (req: IRequest, res: Response) => {
     if (booking) {
       const user = await User.findById(booking.user);
       if (booking.qr) {
+        const date = new Date();
         await Booking.findByIdAndUpdate(bookingId, {
-          $set: { isDelivered: true },
+          $set: {
+            isDelivered: true,
+            deliveredOn: `${date.getDate()} ${date.getMonth()} ${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${
+              date.getSeconds
+            }`,
+          },
           $unset: { qr: "" },
         });
         await cloud.uploader.destroy(
