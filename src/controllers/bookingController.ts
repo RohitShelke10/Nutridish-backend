@@ -56,15 +56,7 @@ export const book = async (req: IRequest, res: Response) => {
     paymentId,
   } = req.body;
   const user = req.user;
-  if (
-    building &&
-    department &&
-    floor &&
-    room &&
-    date &&
-    paymentMode &&
-    quantity
-  ) {
+  if (date && paymentMode && quantity) {
     try {
       if (paymentMode === "UPI") {
         const payment = await razorpay.paymentLink.fetch(paymentId);
@@ -79,10 +71,10 @@ export const book = async (req: IRequest, res: Response) => {
           if (payment.payments[0].status === "captured") {
             const booking = await Booking.create({
               user: user!._id,
-              building: building,
-              department: department,
-              floor: floor,
-              room: room,
+              building: building ? building : user!.building,
+              department: department ? department : user!.department,
+              floor: floor ? floor : user!.floor,
+              room: room ? room : user!.room,
               date: date,
               paymentMode: paymentMode,
               quantity: quantity,
@@ -160,10 +152,10 @@ export const book = async (req: IRequest, res: Response) => {
       } else if (paymentMode === "Pay On Delivery") {
         const booking = await Booking.create({
           user: user!._id,
-          building: building,
-          department: department,
-          floor: floor,
-          room: room,
+          building: building ? building : user!.building,
+          department: department ? department : user!.department,
+          floor: floor ? floor : user!.floor,
+          room: room ? room : user!.room,
           date: date,
           paymentMode: paymentMode,
           quantity: quantity,
