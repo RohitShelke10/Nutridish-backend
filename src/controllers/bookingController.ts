@@ -16,42 +16,49 @@ export const createOrder = async (req: IRequest, res: Response) => {
   const user = req.user;
 
   try {
-    const result = await razorpay.paymentLink.create({
-      upi_link: true,
-      amount: amount * 25 * 100,
-      currency: "INR",
-      description: "Nutri-Dish",
-      reference_id: otpGenerator.generate(10, {
-        digits: true,
-        specialChars: false,
-      }),
-      expire_by: Date.now() + 300000,
-      customer: {
-        name: req.user!.name,
-        email: req.user!.email,
-        contact: req.user!.contact,
-      },
-    });
-    await Booking.create({
-      user: user!._id,
-      date: date,
-      paymentMode: "UPI",
-      quantity: amount,
-      paymentId: result.id,
-      paid: false,
-      building: building ? building : user?.building,
-      department: department ? department : user?.department,
-      floor: floor ? floor : user?.floor,
-      room: room ? room : user?.room,
-    });
-    res.status(200).json({
-      success: true,
-      data: {
-        payment_url: result.short_url,
-        payment_id: result.id,
-        reference_id: result.reference_id,
-      },
-    });
+    if (amount && date) {
+      const result = await razorpay.paymentLink.create({
+        upi_link: true,
+        amount: amount * 25 * 100,
+        currency: "INR",
+        description: "Nutri-Dish",
+        reference_id: otpGenerator.generate(10, {
+          digits: true,
+          specialChars: false,
+        }),
+        expire_by: Date.now() + 300000,
+        customer: {
+          name: req.user!.name,
+          email: req.user!.email,
+          contact: req.user!.contact,
+        },
+      });
+      await Booking.create({
+        user: user!._id,
+        date: date,
+        paymentMode: "UPI",
+        quantity: amount,
+        paymentId: result.id,
+        paid: false,
+        building: building ? building : user?.building,
+        department: department ? department : user?.department,
+        floor: floor ? floor : user?.floor,
+        room: room ? room : user?.room,
+      });
+      res.status(200).json({
+        success: true,
+        data: {
+          payment_url: result.short_url,
+          payment_id: result.id,
+          reference_id: result.reference_id,
+        },
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Invalid params",
+      });
+    }
   } catch (err) {
     res.status(400).json(err);
   }
