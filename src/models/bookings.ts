@@ -4,9 +4,13 @@ import { IBooking } from "../types/types";
 const bookingSchema = new Schema<IBooking>(
   {
     user: { type: Schema.Types.ObjectId, required: true, ref: "users" },
-    building: { type: String, required: true },
-    department: { type: String, required: true },
-    floor: { type: String, required: true },
+    building: { type: Schema.Types.ObjectId, required: true, ref: "buildings" },
+    department: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "departments",
+    },
+    floor: { type: Schema.Types.ObjectId, required: true, ref: "floors" },
     room: { type: String, required: true },
     date: { type: String, required: true },
     paymentMode: {
