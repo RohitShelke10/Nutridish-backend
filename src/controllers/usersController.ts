@@ -71,7 +71,10 @@ export const getOrders = async (req: IRequest, res: Response) => {
   const user = req.user;
 
   try {
-    const orders = await Booking.find({ user: user?._id });
+    const orders = await Booking.find({
+      user: user?._id,
+      $or: [{ paid: true }, { paid: { $exists: false } }],
+    });
     res.status(200).json({ data: orders });
   } catch (err) {
     res.status(400).json(err);
