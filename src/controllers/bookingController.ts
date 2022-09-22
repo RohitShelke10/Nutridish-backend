@@ -2,8 +2,8 @@ import { Response } from "express";
 import { IRequest } from "../types/types";
 import dotenv from "dotenv";
 import Booking from "../models/bookings";
-import Payment from "../models/payments";
-import axios from "axios";
+// import Payment from "../models/payments";
+// import axios from "axios";
 import otpGenerator from "otp-generator";
 import { instance as razorpay } from "../utils/razorpayUtil";
 import QRCode from "qrcode";
@@ -71,13 +71,13 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
   try {
     const payment = await razorpay.paymentLink.fetch(paymentId);
     if (payment.payments.length !== 0) {
-      await Payment.create({
-        user: user!._id,
-        payment_id: payment.payments[0].payment_id,
-        reference_id: payment.reference_id,
-        status: payment.payments[0].status,
-        amount_paid: payment.amount_paid / 100,
-      });
+      // await Payment.create({
+      //   user: user!._id,
+      //   payment_id: payment.payments[0].payment_id,
+      //   reference_id: payment.reference_id,
+      //   status: payment.payments[0].status,
+      //   amount_paid: payment.amount_paid / 100,
+      // });
       if (payment.payments[0].status === "captured") {
         const booking = await Booking.findOneAndUpdate(
           { user: user?._id, paymentId: paymentId },
