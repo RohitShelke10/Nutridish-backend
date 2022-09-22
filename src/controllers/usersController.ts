@@ -74,7 +74,7 @@ export const getOrders = async (req: IRequest, res: Response) => {
     const orders = await Booking.find({
       user: user?._id,
       $or: [{ paid: true }, { paid: { $exists: false } }],
-    });
+    }).sort({ createdAt: -1 });
     res.status(200).json({ data: orders });
   } catch (err) {
     res.status(400).json(err);
