@@ -21,7 +21,7 @@ export const editProfile = async (req: IRequest, res: Response) => {
           department: departmentId,
           room: room,
           detailsEntered: true,
-          // isStaff: isStaff,
+          isStaff: isStaff,
         },
       });
       const updatedUser = await User.findById(user?._id);
