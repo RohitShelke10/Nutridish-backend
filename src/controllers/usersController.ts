@@ -10,16 +10,16 @@ export const editProfile = async (req: IRequest, res: Response) => {
     req.body;
   const id = req.user?._id;
 
-  if (name && contact && buildingId && floorId && departmentId && room) {
+  if (name && contact && isStaff !== undefined) {
     try {
       const user = await User.findByIdAndUpdate(id, {
         $set: {
           name: name,
           contact: contact,
-          building: buildingId,
-          floor: floorId,
-          department: departmentId,
-          room: room,
+          building: buildingId ? buildingId : "",
+          floor: floorId ? floorId : "",
+          department: departmentId ? departmentId : "",
+          room: room ? room : "",
           detailsEntered: true,
           isStaff: isStaff,
         },
