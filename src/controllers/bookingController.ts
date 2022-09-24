@@ -61,7 +61,7 @@ export const createOrder = async (req: IRequest, res: Response) => {
           },
         });
       } else {
-        res.status(400).json({
+        res.status(200).json({
           success: false,
           message: "Orders can't be placed for Sunday",
         });
@@ -175,7 +175,7 @@ export const book = async (req: IRequest, res: Response) => {
         res.status(400).json(err);
       }
     } else {
-      res.status(400).json({
+      res.status(200).json({
         success: false,
         message: "Orders can't be placed for Sunday",
       });
