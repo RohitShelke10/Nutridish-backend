@@ -36,31 +36,20 @@ export const createOrder = async (req: IRequest, res: Response) => {
           contact: req.user!.contact,
         },
       });
-      if (user?.isStaff) {
-        await Booking.create({
-          user: user!._id,
-          date: date,
-          paymentMode: "UPI",
-          quantity: amount,
-          paymentId: result.id,
-          paid: false,
-          building: user?.building,
-          department: user?.department,
-          floor: user?.floor,
-          room: user?.room,
-          price: amount * price,
-        });
-      } else {
-        await Booking.create({
-          user: user!._id,
-          date: date,
-          paymentMode: "UPI",
-          quantity: amount,
-          paymentId: result.id,
-          paid: false,
-          price: amount * price,
-        });
-      }
+      await Booking.create({
+        user: user!._id,
+        date: date,
+        paymentMode: "UPI",
+        quantity: amount,
+        paymentId: result.id,
+        paid: false,
+        building: user?.building,
+        department: user?.department,
+        floor: user?.floor,
+        room: user?.room,
+        price: amount * price,
+      });
+
       res.status(200).json({
         success: true,
         data: {
@@ -138,30 +127,22 @@ export const book = async (req: IRequest, res: Response) => {
   const user = req.user;
   if (date && quantity) {
     try {
-      let booking;
-      if (user?.isStaff) {
-        const price = parseInt(process.env.STAFF_PRICE!);
-        booking = await Booking.create({
-          user: user!._id,
-          date: date,
-          paymentMode: "Pay On Delivery",
-          quantity: quantity,
-          building: user?.building,
-          department: user?.department,
-          floor: user?.floor,
-          room: user?.room,
-          price: quantity * price,
-        });
-      } else {
-        const price = parseInt(process.env.STUDENT_PRICE!);
-        booking = await Booking.create({
-          user: user!._id,
-          date: date,
-          paymentMode: "Pay On Delivery",
-          quantity: quantity,
-          price: quantity * price,
-        });
-      }
+      let price;
+      user?.isStaff
+        ? (price = parseInt(process.env.STAFF_PRICE!))
+        : (price = parseInt(process.env.STUDENT_PRICE!));
+      const booking = await Booking.create({
+        user: user!._id,
+        date: date,
+        paymentMode: "Pay On Delivery",
+        quantity: quantity,
+        building: user?.building,
+        department: user?.department,
+        floor: user?.floor,
+        room: user?.room,
+        price: quantity * price,
+      });
+
       const result = await cloud.uploader.upload(
         await QRCode.toDataURL(
           `${process.env.SERVER_URL}/book/deliver/${booking._id}`

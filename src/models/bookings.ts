@@ -7,7 +7,6 @@ const bookingSchema = new Schema<IBooking>(
     building: { type: Schema.Types.ObjectId, ref: "buildings" },
     department: {
       type: Schema.Types.ObjectId,
-      required: true,
       ref: "departments",
     },
     floor: { type: Schema.Types.ObjectId, ref: "floors" },
