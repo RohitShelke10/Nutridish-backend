@@ -24,6 +24,7 @@ const bookingSchema = new Schema<IBooking>(
     qr: String,
     deliveredOn: String,
     paid: Boolean,
+    price: { type: Number, required: true },
   },
   { timestamps: true }
 );

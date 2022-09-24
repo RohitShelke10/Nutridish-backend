@@ -2,7 +2,6 @@ import { Response } from "express";
 import { IRequest } from "../types/types";
 import dotenv from "dotenv";
 import Booking from "../models/bookings";
-// import Payment from "../models/payments";
 // import axios from "axios";
 import otpGenerator from "otp-generator";
 import { instance as razorpay } from "../utils/razorpayUtil";
@@ -12,14 +11,18 @@ import User from "../models/users";
 dotenv.config();
 
 export const createOrder = async (req: IRequest, res: Response) => {
-  const { amount, date, building, department, floor, room } = req.body;
+  const { amount, date } = req.body;
   const user = req.user;
 
   try {
     if (amount && date) {
+      let price;
+      user?.isStaff
+        ? (price = parseInt(process.env.STAFF_PRICE!))
+        : (price = parseInt(process.env.STUDENT_PRICE!));
       const result = await razorpay.paymentLink.create({
         upi_link: true,
-        amount: amount * 20 * 100,
+        amount: amount * price * 100,
         currency: "INR",
         description: "Nutri-Dish",
         reference_id: otpGenerator.generate(10, {
@@ -33,18 +36,31 @@ export const createOrder = async (req: IRequest, res: Response) => {
           contact: req.user!.contact,
         },
       });
-      await Booking.create({
-        user: user!._id,
-        date: date,
-        paymentMode: "UPI",
-        quantity: amount,
-        paymentId: result.id,
-        paid: false,
-        building: building ? building : user?.building,
-        department: department ? department : user?.department,
-        floor: floor ? floor : user?.floor,
-        room: room ? room : user?.room,
-      });
+      if (user?.isStaff) {
+        await Booking.create({
+          user: user!._id,
+          date: date,
+          paymentMode: "UPI",
+          quantity: amount,
+          paymentId: result.id,
+          paid: false,
+          building: user?.building,
+          department: user?.department,
+          floor: user?.floor,
+          room: user?.room,
+          price: amount * price,
+        });
+      } else {
+        await Booking.create({
+          user: user!._id,
+          date: date,
+          paymentMode: "UPI",
+          quantity: amount,
+          paymentId: result.id,
+          paid: false,
+          price: amount * price,
+        });
+      }
       res.status(200).json({
         success: true,
         data: {
@@ -71,13 +87,6 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
   try {
     const payment = await razorpay.paymentLink.fetch(paymentId);
     if (payment.payments.length !== 0) {
-      // await Payment.create({
-      //   user: user!._id,
-      //   payment_id: payment.payments[0].payment_id,
-      //   reference_id: payment.reference_id,
-      //   status: payment.payments[0].status,
-      //   amount_paid: payment.amount_paid / 100,
-      // });
       if (payment.payments[0].status === "captured") {
         const booking = await Booking.findOneAndUpdate(
           { user: user?._id, paymentId: paymentId },
@@ -125,20 +134,34 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
 };
 
 export const book = async (req: IRequest, res: Response) => {
-  const { building, department, floor, room, date, quantity } = req.body;
+  const { date, quantity } = req.body;
   const user = req.user;
   if (date && quantity) {
     try {
-      const booking = await Booking.create({
-        user: user!._id,
-        building: building ? building : user!.building,
-        department: department ? department : user!.department,
-        floor: floor ? floor : user!.floor,
-        room: room ? room : user!.room,
-        date: date,
-        paymentMode: "Pay On Delivery",
-        quantity: quantity,
-      });
+      let booking;
+      if (user?.isStaff) {
+        const price = parseInt(process.env.STAFF_PRICE!);
+        booking = await Booking.create({
+          user: user!._id,
+          date: date,
+          paymentMode: "Pay On Delivery",
+          quantity: quantity,
+          building: user?.building,
+          department: user?.department,
+          floor: user?.floor,
+          room: user?.room,
+          price: quantity * price,
+        });
+      } else {
+        const price = parseInt(process.env.STUDENT_PRICE!);
+        booking = await Booking.create({
+          user: user!._id,
+          date: date,
+          paymentMode: "Pay On Delivery",
+          quantity: quantity,
+          price: quantity * price,
+        });
+      }
       const result = await cloud.uploader.upload(
         await QRCode.toDataURL(
           `${process.env.SERVER_URL}/book/deliver/${booking._id}`

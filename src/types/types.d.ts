@@ -18,6 +18,7 @@ export interface IBooking {
   date: string;
   paymentMode: string;
   quantity: number;
+  price: number;
   paymentId: string;
   isDelivered: boolean;
   qr: string;
