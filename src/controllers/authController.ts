@@ -12,24 +12,24 @@ const createToken = (id: Schema.Types.ObjectId) => {
 
 export const sendVerificationEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
+  var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  const otp = otpGenerator.generate(6, {
+    digits: true,
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+  sendSmtpEmail = {
+    sender: { email: "startup.mcoe@gmail.com" },
+    to: [
+      {
+        email: email,
+      },
+    ],
+    subject: "Email Verification",
+    textContent: `Your OTP for email verification is ${otp}`,
+  };
   try {
-    var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    const otp = otpGenerator.generate(6, {
-      digits: true,
-      lowerCaseAlphabets: false,
-      upperCaseAlphabets: false,
-      specialChars: false,
-    });
-    sendSmtpEmail = {
-      sender: { email: "startup.mcoe@gmail.com" },
-      to: [
-        {
-          email: email,
-        },
-      ],
-      subject: "Email Verification",
-      textContent: `Your OTP for email verification is ${otp}`,
-    };
     await api.sendTransacEmail(sendSmtpEmail);
     const user = await User.findOne({ email: email });
     if (!user) {
@@ -37,7 +37,7 @@ export const sendVerificationEmail = async (req: Request, res: Response) => {
     } else {
       await User.findOneAndUpdate({ email: email }, { $set: { otp: otp } });
     }
-    res.status(200).json({ data: otp });
+    res.status(200).json({ success: true });
   } catch (err) {
     res.status(400).json(err);
   }
@@ -69,12 +69,10 @@ export const handleSignIn = async (req: Request, res: Response) => {
           .json({ success: false, message: "Incorrect OTP entered" });
       }
     } else {
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: "User with this email does not exist",
-        });
+      res.status(404).json({
+        success: false,
+        message: "User with this email does not exist",
+      });
     }
   } catch (err) {
     res.status(400).json(err);
