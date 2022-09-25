@@ -92,7 +92,11 @@ export const verifyTranscation = async (req: IRequest, res: Response) => {
               paid: true,
             },
           }
-        );
+        )
+          .select({ createdAt: 0, updatedAt: 0, __v: 0 })
+          .populate({ path: "building", select: { _id: 0 } })
+          .populate({ path: "floor", select: { _id: 0, floor: 1 } })
+          .populate({ path: "department", select: { _id: 0, department: 1 } });
         const result = await cloud.uploader.upload(
           await QRCode.toDataURL(
             `${process.env.SERVER_URL}/book/deliver/${booking?._id}`
@@ -166,10 +170,18 @@ export const book = async (req: IRequest, res: Response) => {
         await Booking.findByIdAndUpdate(booking._id, {
           $set: { qr: result.secure_url },
         });
+        const updatedBooking = await Booking.findById(booking._id, {
+          createdAt: 0,
+          updatedAt: 0,
+          __v: 0,
+        })
+          .populate({ path: "building", select: { _id: 0 } })
+          .populate({ path: "floor", select: { _id: 0, floor: 1 } })
+          .populate({ path: "department", select: { _id: 0, department: 1 } });
         res.status(200).json({
           success: true,
           message: "Success",
-          data: { booking: booking, qr: result.secure_url },
+          data: { booking: updatedBooking, qr: result.secure_url },
         });
       } catch (err) {
         res.status(400).json(err);

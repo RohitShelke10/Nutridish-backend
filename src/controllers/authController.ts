@@ -56,7 +56,7 @@ export const handleSignIn = async (req: Request, res: Response) => {
       if (user.otp === parseInt(otp)) {
         const updatedUser = await User.findByIdAndUpdate(user._id, {
           $unset: { otp: "" },
-        }).select({ otp: 0 });
+        }).select({ otp: 0, createdAt: 0, updatedAt: 0, __v: 0 });
         const token = createToken(user._id);
         res.status(201).json({
           success: true,
