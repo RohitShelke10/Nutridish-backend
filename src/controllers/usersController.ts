@@ -24,7 +24,11 @@ export const editProfile = async (req: IRequest, res: Response) => {
           isStaff: isStaff,
         },
       });
-      const updatedUser = await User.findById(user?._id);
+      const updatedUser = await User.findById(user?._id, {
+        createdAt: 0,
+        updatedAt: 0,
+        __v: 0,
+      });
       res.status(200).json({
         success: true,
         message: "User details updated",
@@ -71,11 +75,26 @@ export const getOrders = async (req: IRequest, res: Response) => {
   const user = req.user;
 
   try {
-    const orders = await Booking.find({
-      user: user?._id,
-      $or: [{ paid: true }, { paid: { $exists: false } }],
-    }).sort({ createdAt: -1 });
-    res.status(200).json({ data: orders });
+    if (user?.isStaff) {
+      const orders = await Booking.find({
+        user: user?._id,
+        $or: [{ paid: true }, { paid: { $exists: false } }],
+      })
+        .sort({ createdAt: -1 })
+        .select({ createdAt: 0, updatedAt: 0, __v: 0 })
+        .populate({ path: "building", select: { _id: 0 } })
+        .populate({ path: "floor", select: { _id: 0, floor: 1 } })
+        .populate({ path: "department", select: { _id: 0, department: 1 } });
+      res.status(200).json({ data: orders });
+    } else {
+      const orders = await Booking.find({
+        user: user?._id,
+        $or: [{ paid: true }, { paid: { $exists: false } }],
+      })
+        .sort({ createdAt: -1 })
+        .select({ createdAt: 0, updatedAt: 0, __v: 0 });
+      res.status(200).json({ data: orders });
+    }
   } catch (err) {
     res.status(400).json(err);
   }
